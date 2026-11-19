@@ -62,17 +62,9 @@ pyinstaller --noconfirm --clean --onefile --windowed --name AutoKeyPixel --colle
 2. roda os testes unitários e um *smoke test* da interface;
 3. gera `AutoKeyPixel.exe` com PyInstaller;
 4. publica o `.exe` como artefato do build;
-5. em tags `v*` (ex.: `v0.1.0`), cria uma **Release** com o `.exe` anexado.
+5. quando uma **Release é publicada** (pela página Releases → *Draft a new release*), ou quando uma tag `v*` é enviada, anexa o `.exe` à Release.
 
-Para publicar uma nova versão: atualize `__version__` em `autokey_pixel/__init__.py` e depois:
-
-```bash
-git tag v0.2.0
-```
-
-```bash
-git push origin v0.2.0
-```
+Para publicar uma nova versão: atualize `__version__` em `autokey_pixel/__init__.py` e `pyproject.toml`, depois crie a Release no GitHub com a tag nova (ex.: `v0.2.0`). O pipeline compila e anexa o `AutoKeyPixel.exe` em cerca de 2 minutos.
 
 ## Arquitetura
 

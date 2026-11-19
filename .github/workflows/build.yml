@@ -5,6 +5,8 @@ on:
     branches: [main]
     tags: ["v*"]
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +17,7 @@ jobs:
     name: Testar e gerar .exe (Windows)
     runs-on: windows-latest
     permissions:
-      contents: write # necessário apenas para publicar a release em tags v*
+      contents: write # necessário apenas para publicar/anexar o .exe na release
     steps:
       - uses: actions/checkout@v5
 
@@ -57,8 +59,14 @@ jobs:
           path: dist/AutoKeyPixel.exe
           if-no-files-found: error
 
-      - name: Criar release (somente em tags v*)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Anexar .exe à release publicada
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/AutoKeyPixel.exe --clobber
+
+      - name: Criar release (push de tag v*)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "${{ github.ref_name }}" dist/AutoKeyPixel.exe --title "AutoKey Pixel ${{ github.ref_name }}" --generate-notes
