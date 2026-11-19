@@ -1,0 +1,10 @@
+[project]
+name = "autokey-pixel"
+version = "0.1.0"
+description = "Repetidor de tecla com jitter e captura de pixel do cursor (Windows)"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
