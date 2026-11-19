@@ -8,7 +8,7 @@ Repetidor de tecla para Windows com **jitter configurável** e **captura de pixe
 
 O executável é gerado automaticamente pelo GitHub Actions:
 
-- **Versão estável:** página [Releases](../../releases) → `AutoKeyPixel.exe`
+- **Versão estável:** página [Releases](../../releases) → `AutoKeyPixel.exe` ou `AutoKeyPixel-v<versão>-windows.zip`
 - **Último build de `main`:** aba [Actions](../../actions/workflows/build.yml) → execução mais recente → artefato `AutoKeyPixel-windows`
 
 Não precisa instalar nada: é só executar o `.exe`.
@@ -62,9 +62,10 @@ pyinstaller --noconfirm --clean --onefile --windowed --name AutoKeyPixel --colle
 2. roda os testes unitários e um *smoke test* da interface;
 3. gera `AutoKeyPixel.exe` com PyInstaller;
 4. publica o `.exe` como artefato do build;
-5. quando uma **Release é publicada** (pela página Releases → *Draft a new release*), ou quando uma tag `v*` é enviada, anexa o `.exe` à Release.
+5. em push na `main`, lê `__version__` e, se ainda não existir a Release `v<versão>`, **publica a Release** com `AutoKeyPixel.exe` e `AutoKeyPixel-v<versão>-windows.zip`;
+6. se uma Release for criada manualmente pela página do GitHub (ou uma tag `v*` for enviada), anexa os mesmos dois arquivos a ela.
 
-Para publicar uma nova versão: atualize `__version__` em `autokey_pixel/__init__.py` e `pyproject.toml`, depois crie a Release no GitHub com a tag nova (ex.: `v0.2.0`). O pipeline compila e anexa o `AutoKeyPixel.exe` em cerca de 2 minutos.
+Para publicar uma nova versão, aumente `__version__` em `autokey_pixel/__init__.py` (e em `pyproject.toml`) e faça push na `main`. A Release sai em cerca de 2 minutos.
 
 ## Arquitetura
 

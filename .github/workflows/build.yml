@@ -59,14 +59,42 @@ jobs:
           path: dist/AutoKeyPixel.exe
           if-no-files-found: error
 
-      - name: Anexar .exe à release publicada
+      - name: Ler versão e empacotar .zip
+        id: pkg
+        run: |
+          $ver = python -c "import autokey_pixel; print(autokey_pixel.__version__)"
+          $zip = "dist/AutoKeyPixel-v$ver-windows.zip"
+          Compress-Archive -Path dist/AutoKeyPixel.exe -DestinationPath $zip -Force
+          "version=$ver" >> $env:GITHUB_OUTPUT
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      # Push na main: cria automaticamente a release v<__version__> se ela ainda não existir.
+      - name: Publicar release da versão atual (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v${{ steps.pkg.outputs.version }}"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $tag já existe; nada a publicar. Aumente __version__ para gerar outra."
+            exit 0
+          }
+          gh release create $tag dist/AutoKeyPixel.exe "${{ steps.pkg.outputs.zip }}" `
+            --target $env:GITHUB_SHA --title "AutoKey Pixel $tag" `
+            --notes-file .github/release-notes.md --generate-notes
+
+      # Release criada manualmente na página do GitHub: anexa os arquivos a ela.
+      - name: Anexar arquivos à release publicada
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/AutoKeyPixel.exe --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/AutoKeyPixel.exe "${{ steps.pkg.outputs.zip }}" --clobber
 
       - name: Criar release (push de tag v*)
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" dist/AutoKeyPixel.exe --title "AutoKey Pixel ${{ github.ref_name }}" --generate-notes
+        run: |
+          gh release create "${{ github.ref_name }}" dist/AutoKeyPixel.exe "${{ steps.pkg.outputs.zip }}" `
+            --title "AutoKey Pixel ${{ github.ref_name }}" --notes-file .github/release-notes.md --generate-notes
